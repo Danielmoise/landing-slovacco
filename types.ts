@@ -101,6 +101,12 @@ export interface UiTranslation {
     shippingInsuranceDescription: string;
     gadgetDescription: string;
     freeLabel: string;
+    // NEW: Order Summary keys
+    summaryProduct: string;
+    summaryShipping: string;
+    summaryInsurance: string;
+    summaryGadget: string;
+    summaryTotal: string;
 }
 
 export interface GeneratedContent {

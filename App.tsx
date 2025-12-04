@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase, isSupabaseConfigured, base64ToBlob } from './services/supabaseClient';
-import { generateLandingPage, generateReviews, generateActionImages, translateLandingPage } from './services/geminiService';
+import { generateLandingPage, generateReviews, generateActionImages, translateLandingPage, getLanguageConfig } from './services/geminiService';
 import LandingPage, { ThankYouPage } from './components/LandingPage';
 import { ProductDetails, GeneratedContent, PageTone, UserSession, LandingPageRow, TemplateId, FormFieldConfig, TypographyConfig, UiTranslation, SiteConfig, Testimonial } from './types';
 import { Loader2, LogOut, Sparkles, Star, ChevronLeft, ChevronRight, Save, ShoppingBag, ArrowRight, Trash2, Eye, UserPlus, LogIn, LayoutDashboard, Check, Image as ImageIcon, X, MonitorPlay, RefreshCcw, ArrowLeft, Settings, CreditCard, Link as LinkIcon, ListChecks, Pencil, Smartphone, Tablet, Monitor, Plus, MessageSquare, Images, Upload, Type, Truck, Flame, Zap, Globe, Banknote, MousePointerClick, Palette, Users, Copy, Target, MessageCircle, Code, Mail, Lock, Map, User, ArrowUp, ArrowDown, Package, ShieldCheck, FileText as FileTextIcon, Gift } from 'lucide-react';
@@ -761,12 +761,73 @@ export const App: React.FC = () => {
   };
 
   const handleEditPage = (page: LandingPageRow) => {
-      setEditingPageId(page.id); setSlug(page.slug || formatSlug(page.product_name)); setTySlug(page.thank_you_slug || (page.slug + getThankYouSuffix(page.content.language || 'Italiano')));
-      let testimonials = page.content.testimonials || []; if (testimonials.length === 0 && page.content.testimonial) { testimonials = [page.content.testimonial]; }
-      const contentWithDefaults = { ...page.content, testimonials, formConfiguration: page.content.formConfiguration || DEFAULT_FORM_CONFIG, price: page.content.price || "49.90", currency: page.content.currency || "€", originalPrice: page.content.originalPrice || "99.90", generatedImages: page.content.generatedImages || (page.content.heroImageBase64 ? [page.content.heroImageBase64] : []), typography: page.content.typography || { fontFamily: 'sans', h1Size: 'lg', h2Size: 'md', bodySize: 'md' }, stockConfig: page.content.stockConfig || { enabled: false, quantity: 13 }, showFeatureIcons: page.content.showFeatureIcons || false, language: page.content.language || 'Italiano', showSocialProofBadge: page.content.showSocialProofBadge !== false, socialProofConfig: page.content.socialProofConfig || { enabled: true, intervalSeconds: 10, maxShows: 4 }, shippingCost: page.content.shippingCost || "0", enableShippingCost: page.content.enableShippingCost || false, insuranceConfig: page.content.insuranceConfig || { enabled: false, label: 'Assicurazione Spedizione VIP', cost: '4.99', defaultChecked: false }, gadgetConfig: page.content.gadgetConfig || { enabled: false, label: '2 Gadget in Regalo', cost: '9.99', defaultChecked: false }, customTypography: page.content.customTypography || {}, priceStyles: page.content.priceStyles || {}, reviewsPosition: page.content.reviewsPosition, customHeadHtml: page.custom_head_html || page.content.customHeadHtml || '', customThankYouHtml: page.custom_thankyou_html || page.content.customThankYouHtml || '', metaLandingHtml: page.content.metaLandingHtml || '', tiktokLandingHtml: page.content.tiktokLandingHtml || '', metaThankYouHtml: page.content.metaThankYouHtml || '', tiktokThankYouHtml: page.content.tiktokThankYouHtml || '', extraLandingHtml: page.content.extraLandingHtml || '', extraThankYouHtml: page.content.extraThankYouHtml || '', customThankYouUrl: page.content.customThankYouUrl || '', backgroundColor: page.content.backgroundColor };
+      setEditingPageId(page.id);
+      setSlug(page.slug || formatSlug(page.product_name));
+      setTySlug(page.thank_you_slug || (page.slug + getThankYouSuffix(page.content.language || 'Italiano')));
+      let testimonials = page.content.testimonials || [];
+      if (testimonials.length === 0 && page.content.testimonial) {
+          testimonials = [page.content.testimonial];
+      }
+  
+      const pageLang = page.content.language || 'Italiano';
+      const langConfig = getLanguageConfig(pageLang);
+      const completeUiTranslation = { ...(langConfig.ui || {}), ...(page.content.uiTranslation || {}) };
+  
+      const contentWithDefaults = {
+          ...page.content,
+          testimonials,
+          uiTranslation: completeUiTranslation,
+          formConfiguration: page.content.formConfiguration || DEFAULT_FORM_CONFIG,
+          price: page.content.price || "49.90",
+          currency: page.content.currency || "€",
+          originalPrice: page.content.originalPrice || "99.90",
+          generatedImages: page.content.generatedImages || (page.content.heroImageBase64 ? [page.content.heroImageBase64] : []),
+          typography: page.content.typography || { fontFamily: 'sans', h1Size: 'lg', h2Size: 'md', bodySize: 'md' },
+          stockConfig: page.content.stockConfig || { enabled: false, quantity: 13 },
+          showFeatureIcons: page.content.showFeatureIcons || false,
+          language: page.content.language || 'Italiano',
+          showSocialProofBadge: page.content.showSocialProofBadge !== false,
+          socialProofConfig: page.content.socialProofConfig || { enabled: true, intervalSeconds: 10, maxShows: 4 },
+          shippingCost: page.content.shippingCost || "0",
+          enableShippingCost: page.content.enableShippingCost || false,
+          insuranceConfig: page.content.insuranceConfig || { enabled: false, label: 'Assicurazione Spedizione VIP', cost: '4.99', defaultChecked: false },
+          gadgetConfig: page.content.gadgetConfig || { enabled: false, label: '2 Gadget in Regalo', cost: '9.99', defaultChecked: false },
+          customTypography: page.content.customTypography || {},
+          priceStyles: page.content.priceStyles || {},
+          reviewsPosition: page.content.reviewsPosition,
+          customHeadHtml: page.custom_head_html || page.content.customHeadHtml || '',
+          customThankYouHtml: page.custom_thankyou_html || page.content.customThankYouHtml || '',
+          metaLandingHtml: page.content.metaLandingHtml || '',
+          tiktokLandingHtml: page.content.tiktokLandingHtml || '',
+          metaThankYouHtml: page.content.metaThankYouHtml || '',
+          tiktokThankYouHtml: page.content.tiktokThankYouHtml || '',
+          extraLandingHtml: page.content.extraLandingHtml || '',
+          extraThankYouHtml: page.content.extraThankYouHtml || '',
+          customThankYouUrl: page.content.customThankYouUrl || '',
+          backgroundColor: page.content.backgroundColor
+      };
+  
       setGeneratedContent(contentWithDefaults as GeneratedContent);
-      setGeneratedThankYouContent(page.thank_you_content ? page.thank_you_content as GeneratedContent : createDefaultThankYouContent(contentWithDefaults as GeneratedContent));
-      setProduct({ name: page.product_name, niche: page.niche, description: "Caricato da pagina esistente", targetAudience: "N/A", tone: PageTone.PROFESSIONAL, language: contentWithDefaults.language, featureCount: contentWithDefaults.features?.length || 3, image: contentWithDefaults.heroImageBase64 }); if (page.content.templateId) { setSelectedTemplate(page.content.templateId); }
+  
+      const existingTyContent = page.thank_you_content 
+          ? { ...page.thank_you_content, uiTranslation: completeUiTranslation } 
+          : null;
+      setGeneratedThankYouContent(existingTyContent ? existingTyContent as GeneratedContent : createDefaultThankYouContent(contentWithDefaults as GeneratedContent));
+  
+      setProduct({
+          name: page.product_name,
+          niche: page.niche,
+          description: "Caricato da pagina esistente",
+          targetAudience: "N/A",
+          tone: PageTone.PROFESSIONAL,
+          language: contentWithDefaults.language,
+          featureCount: contentWithDefaults.features?.length || 3,
+          image: contentWithDefaults.heroImageBase64
+      });
+  
+      if (page.content.templateId) {
+          setSelectedTemplate(page.content.templateId);
+      }
       setEditingMode('landing');
   };
 
@@ -906,7 +967,17 @@ export const App: React.FC = () => {
 
   // ... (Render logic) ...
   if (view === 'product_view' && selectedPublicPage) {
-      const contentWithScripts = { ...selectedPublicPage.content, customHeadHtml: selectedPublicPage.custom_head_html || selectedPublicPage.content.customHeadHtml, customThankYouHtml: selectedPublicPage.custom_thankyou_html || selectedPublicPage.content.customThankYouHtml };
+      const pageLang = selectedPublicPage.content.language || 'Italiano';
+      const langConfig = getLanguageConfig(pageLang);
+      const completeUiTranslation = { ...(langConfig.ui || {}), ...(selectedPublicPage.content.uiTranslation || {}) };
+      
+      const contentWithDefaults = {
+        ...selectedPublicPage.content,
+        uiTranslation: completeUiTranslation,
+        customHeadHtml: selectedPublicPage.custom_head_html || selectedPublicPage.content.customHeadHtml,
+        customThankYouHtml: selectedPublicPage.custom_thankyou_html || selectedPublicPage.content.customThankYouHtml
+      };
+
       return (
         <div className="relative">
             <div className="fixed top-3 left-3 z-[100] md:left-3 left-auto right-3 md:right-auto">
@@ -923,15 +994,30 @@ export const App: React.FC = () => {
                         <span className="hidden md:inline font-bold text-sm">Torna allo Shop</span>
                 </button>
             </div>
-            {session && (<div className="fixed top-3 right-3 z-[100]"><button onClick={() => setView('admin')} className="bg-emerald-600/90 backdrop-blur text-white p-2 md:px-4 md:py-2 rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center gap-2 font-bold" title="Dashboard Admin"><LayoutDashboard className="w-5 h-5" /> <span className="hidden md:inline">Dashboard Admin</span></button></div>)}
-            <LandingPage content={contentWithScripts} thankYouSlug={selectedPublicPage.thank_you_slug} onPurchase={handlePurchase} />
+            <LandingPage content={contentWithDefaults} thankYouSlug={selectedPublicPage.thank_you_slug} onPurchase={handlePurchase} />
         </div>
       );
   }
 
   if (view === 'thank_you_view' && selectedPublicPage) {
-      const tyContent = selectedPublicPage.thank_you_content || createDefaultThankYouContent(selectedPublicPage.content);
-      return ( <div className="relative"> {session && (<div className="fixed top-3 right-3 z-[100]"><button onClick={() => setView('admin')} className="bg-emerald-600 text-white p-2 rounded-full shadow"><LayoutDashboard className="w-4 h-4"/></button></div>)} <ThankYouPage content={tyContent} initialData={orderData} /> </div> )
+    const pageLang = selectedPublicPage.content.language || 'Italiano';
+    const langConfig = getLanguageConfig(pageLang);
+
+    // The base landing page content, with its UI translations completed.
+    // This is needed in case we must generate a default TY page.
+    const completeLandingContent = {
+        ...selectedPublicPage.content,
+        uiTranslation: { ...(langConfig.ui || {}), ...(selectedPublicPage.content.uiTranslation || {}) }
+    };
+
+    // Use the thank_you_content if it exists, otherwise generate a default.
+    // In either case, ensure its UI translations are complete.
+    const tyContentSource = selectedPublicPage.thank_you_content || createDefaultThankYouContent(completeLandingContent);
+    const tyContent = {
+        ...tyContentSource,
+        uiTranslation: { ...(langConfig.ui || {}), ...(tyContentSource.uiTranslation || {}) }
+    };
+      return ( <div className="relative"> <ThankYouPage content={tyContent} initialData={orderData} /> </div> )
   }
 
   if (view === 'admin' && session) {
@@ -1433,11 +1519,6 @@ export const App: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center shadow-lg"><Sparkles className="w-6 h-6 text-white"/></div>
                 <h1 className="text-xl font-bold text-slate-900" onClick={handleStealthClick}>{siteConfig.siteName}</h1>
             </div>
-            {isSupabaseConfigured() && (
-                 session ? 
-                 <button onClick={() => setView('admin')} className="hidden sm:flex items-center gap-2 py-2 px-4 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition shadow-md"><LayoutDashboard className="w-4 h-4" /> Vai alla Dashboard</button> :
-                 <button onClick={() => setIsLoginOpen(true)} className="hidden sm:flex items-center gap-2 py-2 px-4 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-900 transition"><LogIn className="w-4 h-4"/> Area Riservata</button>
-            )}
         </div>
       </header>
       <main className="container mx-auto px-6 py-12">

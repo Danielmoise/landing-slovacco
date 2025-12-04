@@ -440,7 +440,12 @@ const DEFAULT_LABELS = {
     gadgetLabel: "Add Gadget",
     shippingInsuranceDescription: "Package protected against theft and loss.",
     gadgetDescription: "Add to your order.",
-    freeLabel: "Free"
+    freeLabel: "Free",
+    summaryProduct: "Product:",
+    summaryShipping: "Shipping:",
+    summaryInsurance: "Insurance:",
+    summaryGadget: "Gadget:",
+    summaryTotal: "Total:",
 };
 
 // --- ORDER POPUP MODAL ---
@@ -648,11 +653,11 @@ const OrderPopup: React.FC<{ isOpen: boolean; onClose: () => void; content: Gene
                         <div className="flex-1">
                             <h4 className="font-bold text-slate-900 line-clamp-1 text-sm mb-1">{content.headline}</h4>
                             <div className="space-y-1 mt-2 pt-2 border-t border-slate-200/60 text-xs">
-                                    <div className="flex justify-between text-slate-500"><span>Prodotto:</span><span>{labels.currencyPos === 'before' ? `${currency} ${content.price}` : `${content.price} ${currency}`}</span></div>
-                                    {content.enableShippingCost && <div className="flex justify-between text-slate-500"><span>Spedizione:</span><span>{labels.currencyPos === 'before' ? `${currency} ${content.shippingCost}` : `${content.shippingCost} ${currency}`}</span></div>}
-                                    {isInsuranceChecked && content.insuranceConfig?.enabled && <div className="flex justify-between text-emerald-600"><span>Assicurazione:</span><span>+ {labels.currencyPos === 'before' ? `${currency} ${content.insuranceConfig.cost}` : `${content.insuranceConfig.cost} ${currency}`}</span></div>}
-                                    {isGadgetChecked && content.gadgetConfig?.enabled && <div className="flex justify-between text-purple-600"><span>Gadget:</span><span>+ {labels.currencyPos === 'before' ? `${currency} ${content.gadgetConfig.cost}` : `${content.gadgetConfig.cost}${currency}`}</span></div>}
-                                    <div className="flex justify-between text-slate-900 font-bold text-sm pt-1 border-t border-slate-200"><span>Totale:</span><span>{labels.currencyPos === 'before' ? `${currency} ${calculateTotal()}` : `${calculateTotal()} ${currency}`}</span></div>
+                                    <div className="flex justify-between text-slate-500"><span>{labels.summaryProduct}</span><span>{labels.currencyPos === 'before' ? `${currency} ${content.price}` : `${content.price} ${currency}`}</span></div>
+                                    {content.enableShippingCost && <div className="flex justify-between text-slate-500"><span>{labels.summaryShipping}</span><span>{labels.currencyPos === 'before' ? `${currency} ${content.shippingCost}` : `${content.shippingCost} ${currency}`}</span></div>}
+                                    {isInsuranceChecked && content.insuranceConfig?.enabled && <div className="flex justify-between text-emerald-600"><span>{labels.summaryInsurance}</span><span>+ {labels.currencyPos === 'before' ? `${currency} ${content.insuranceConfig.cost}` : `${content.insuranceConfig.cost} ${currency}`}</span></div>}
+                                    {isGadgetChecked && content.gadgetConfig?.enabled && <div className="flex justify-between text-purple-600"><span>{labels.summaryGadget}</span><span>+ {labels.currencyPos === 'before' ? `${currency} ${content.gadgetConfig.cost}` : `${content.gadgetConfig.cost}${currency}`}</span></div>}
+                                    <div className="flex justify-between text-slate-900 font-bold text-sm pt-1 border-t border-slate-200"><span>{labels.summaryTotal}</span><span>{labels.currencyPos === 'before' ? `${currency} ${calculateTotal()}` : `${calculateTotal()} ${currency}`}</span></div>
                                 </div>
                         </div>
                     </div>
